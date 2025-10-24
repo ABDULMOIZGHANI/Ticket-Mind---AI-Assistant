@@ -89,3 +89,46 @@ export const logout = async (req, res) => {
     }
   });
 };
+
+export const updateUser = async (req, res) => {
+  const {
+    skills: [],
+    email,
+    role
+  } = req.body;
+
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await user.updateOne({
+      email,
+      skills: skills.length ? skills : user.skills,
+      role
+    });
+
+    return res.json({ message: "User updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "User is not updated" });
+  }
+};
+
+export const gertUser = async (req, res) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const users = await User.find().select("-password");
+
+    return res.json(users);
+  } catch (error) {
+    return res.status(500).json({ message: "Cannot get users" });
+  }
+};
